@@ -11,10 +11,12 @@ for i in range(0, n):
     t, p = map(int, sys.stdin.readline().rstrip().split())
     input_schedule_and_profit.append((t, p))
 
+input_schedule_and_profit.reverse()
+input_schedule_and_profit.insert(0, [])
 
 dp_table = [0] * (n+1)
 
-for i in range(0, n-1):
+for i in range(1, n+1):
     if i < input_schedule_and_profit[i][0]:
         dp_table[i] = dp_table[i-1]
     else:
