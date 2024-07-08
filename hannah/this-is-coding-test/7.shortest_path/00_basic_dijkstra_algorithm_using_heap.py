@@ -53,7 +53,7 @@ def dijkstra(start):
         # heap에 push할 때 우선순위대로 값이 정렬되므로 pop을 하면 x가 가장 작은, 즉, 거리가 가장 짧은 노드부터 나온다
         d, target_node = heapq.heappop(q)
 
-        if d < distance[target_node]:  # target_node까지의 거리가 d 보다 작다는 것은 이미 최소값을 갱신되었다는 의미. 즉, 이 노드는 이미 방문처리 되었다는 것을 의미한다.
+        if distance[target_node] < d:  # target_node까지의 거리가 d 보다 작다는 것은 이미 최소값을 갱신되었다는 의미. 즉, 이 노드는 이미 방문처리 되었다는 것을 의미한다.
             continue
 
         for linked_node, d in gragh[target_node]:

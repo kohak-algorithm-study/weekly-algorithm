@@ -55,7 +55,7 @@ while q:
     dist, target_city = heapq.heappop(q)
 
     # 이미 처리한 노드는 pass
-    if dist < min_dist[target_city]:
+    if min_dist[target_city] < dist:
         continue
 
     for linked_city, linked_city_d in gragh[target_city]:
