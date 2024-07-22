@@ -49,15 +49,12 @@ hours = [0] * (N + 1)
 indegree = [0] * (N + 1)
 for i in range(1, N + 1):
     input_nums = list(map(int, input().split()))
-    hour = input_nums[0]
-    hours[i] = hour
+    hours[i] = input_nums[0]
 
-    prerequisites = input_nums[1: -1]
-    gragh[i].extend(prerequisites)
-    indegree[i] += len(prerequisites)
-
-print("=====gragh======")
-print(gragh)
+    pre_lectures = input_nums[1: -1]
+    for pre_lecture in pre_lectures:
+        gragh[pre_lecture].append(i)  # gragh[i].append()로 하면 X
+        indegree[i] += 1
 
 result = deepcopy(hours)
 q = deque()
@@ -67,24 +64,14 @@ for i in range(1, N + 1):
 
 while q:
     current_lecture = q.popleft()
-    print(f'current: {current_lecture}')
-    print(f'result current: {result[current_lecture]}')
-    print(f'current hour: {hours[current_lecture]}')
-
     for next_lecture in gragh[current_lecture]:
-        print(f'next: {next_lecture}')
         indegree[next_lecture] -= 1
-        print(f'next indegree: {indegree[next_lecture]}')
-        print(f'result next: {result[next_lecture]}')
-        print(f'next hour: {hours[next_lecture]}')
 
         # 현재까지의 최소 시간 + 다음 강의 시간 vs 다음 강의 까지의 최소 시간
         result[next_lecture] = max(hours[next_lecture] + result[current_lecture], result[next_lecture])
-        print(f'result next: {result[next_lecture]}')
 
         if indegree[next_lecture] == 0:
             q.append(next_lecture)
-
 
 for i in range(1, N + 1):
     print(result[i])
