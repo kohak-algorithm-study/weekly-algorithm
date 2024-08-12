@@ -1,24 +1,12 @@
 '''
 https://www.acmicpc.net/problem/14502
 '''
-# 시간초과!!!
+# 시간초과!!! -> v2로 수정
 
 import sys
 from collections import deque
 from copy import deepcopy
-
-input = sys.stdin.readline
-n, m = map(int, input().rstrip().split())  # n: 세로, m: 가로
-gragh = []
-
-for _ in range(n):
-    gragh.append(list(map(int, input().rstrip().split())))
-
-
-# 상하좌우
-dx = [-1, 1, 0, 0]
-dy = [0, 0, -1, 1]
-max_safe_cnt = 0
+from itertools import combinations
 
 
 # 벽 3개 세우기 + 바이러스 감염 시나리오
@@ -62,12 +50,43 @@ def infect_with_virus():
                 temp_gragh[nx][ny] = 2
                 q.append((nx, ny))
 
-    global max_safe_cnt
-    temp_safe_cnt = get_safe_cnt(temp_gragh)
-    if temp_safe_cnt > max_safe_cnt:
-        max_safe_cnt = temp_safe_cnt
-
+    update_max_safe_cnt(temp_gragh)
     return
+
+
+def make_wall_v2():
+    empty = [(i, j) for i in range(n) for j in range(m) if gragh[i][j] == 0]
+    for combi in combinations(empty, 3):  # 벽을 세울 수 있는 곳을 조합으로 추출
+        temp_gragh = deepcopy(gragh)
+        for x, y in combi:
+            temp_gragh[x][y] = 1  # 벽 세우기
+
+        infect_with_virus_v2(temp_gragh)
+
+
+def infect_with_virus_v2(gragh):
+    q = deque()  # 바이러스 위치 저장
+
+    for i in range(n):
+        for j in range(m):
+            if gragh[i][j] == 2:
+                q.append((i, j))
+
+    while q:
+        x, y = q.popleft()
+
+        for i in range(4):
+            nx = x + dx[i]
+            ny = y + dy[i]
+
+            if nx < 0 or ny < 0 or nx >= n or ny >= m:
+                continue
+
+            if gragh[nx][ny] == 0:
+                gragh[nx][ny] = 2
+                q.append((nx, ny))
+
+    update_max_safe_cnt(gragh)
 
 
 # 안전영역 개수 구하기
@@ -78,5 +97,26 @@ def get_safe_cnt(g):
     return cnt
 
 
-make_wall(0)
-print(max_safe_cnt)
+def update_max_safe_cnt(gragh):
+    global max_safe_cnt
+    temp_safe_cnt = get_safe_cnt(gragh)
+    if temp_safe_cnt > max_safe_cnt:
+        max_safe_cnt = temp_safe_cnt
+
+
+if __name__ == "__main__":
+    input = sys.stdin.readline
+    n, m = map(int, input().rstrip().split())  # n: 세로, m: 가로
+    gragh = []
+
+    for _ in range(n):
+        gragh.append(list(map(int, input().rstrip().split())))
+
+    # 상하좌우
+    dx = [-1, 1, 0, 0]
+    dy = [0, 0, -1, 1]
+    max_safe_cnt = 0
+
+    # make_wall(0)
+    make_wall_v2()
+    print(max_safe_cnt)
