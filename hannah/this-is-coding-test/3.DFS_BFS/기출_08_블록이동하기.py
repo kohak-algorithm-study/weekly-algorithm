@@ -4,83 +4,75 @@ https://school.programmers.co.kr/learn/courses/30/lessons/60063
 from collections import deque
 
 
-def solution(board):
-    answer = bfs(board)
-    return answer
-
-
-def get_next_positions(board, cur_pos):
-    n = len(board)
-    next_positions = []
-    (x1, y1), (x2, y2) = cur_pos
-
+def get_passible_next_position(board, x1, y1, x2, y2):
     dx = [-1, 1, 0, 0]
     dy = [0, 0, -1, 1]
-    # 상하좌우로 이동하는 경우
+    n = len(board)
+
+    positions = []
+
+    # 이동하는 경우
     for i in range(4):
-        nx1 = x1 + dx[i]
-        ny1 = y1 + dy[i]
-        nx2 = x2 + dx[i]
-        ny2 = y2 + dy[i]
+        nx1, ny1 = x1 + dx[i], y1 + dy[i]
+        nx2, ny2 = x2 + dx[i], y2 + dy[i]
 
         if nx1 < 0 or ny1 < 0 or nx2 >= n or ny2 >= n:
             continue
 
         if board[nx1][ny1] == 0 and board[nx2][ny2] == 0:
-            next_positions.append(((nx1, ny1), (nx2, ny2)))
+            positions.append(((nx1, ny1), (nx2, ny2)))
 
-    # 현재 가로로 놓여있는 경우
-    if x1 == x2:
-        # 가로 -> 세로 (위로 회전)
+    # 회전하는 경우
+    if x1 == x2:  # 로봇이 가로로 놓여져 있을 때
+        # 위쪽으로 돌려서 회전 할 때 -> 현재 두 칸의 윗 칸 모두가 0이여야 회전 가능
         if x1 - 1 >= 0 and x2 - 1 >= 0:
-            if board[x1 - 1][y1] == 0 and board[x2 - 1][y2] == 0:  # 위에 두 칸 모두 0이여야 회전 가능
-                next_positions.append(((x1 - 1, y1), (x1, y1)))
-                next_positions.append(((x2 - 1, y2), (x2, y2)))
+            if board[x1 - 1][y1] == 0 and board[x2 - 1][y2] == 0:
+                positions.append(((x1 - 1, y1), (x1, y1)))
+                positions.append(((x2 - 1, y2), (x2, y2)))
 
-        # 가로 -> 세로 (아래로 회전)
+        # 아래쪽으로 돌려서 회전 할 때 -> 현재 두 칸의 아랫 칸 모두가 0이여야 회전 가능
         if x1 + 1 < n and x2 + 1 < n:
-            if board[x1 + 1][y1] == 0 and board[x2 + 1][y2] == 0:  # 아래 두 칸 모두 0이여야 회전 가능
-                next_positions.append(((x1, y1), (x1 + 1, y1)))
-                next_positions.append(((x2, y2), (x2 + 1, y2)))
+            if board[x1 + 1][y1] == 0 and board[x2 + 1][y2] == 0:
+                positions.append(((x1, y1), (x1 + 1, y1)))
+                positions.append(((x2, y2), (x2 + 1, y2)))
 
-    # 현재 세로로 놓여있는 경우
-    else:
-        # 세로 -> 가로 (오른쪽으로 회전)
+    else:  # 로봇이 세로로 놓여져 있을 때
+        # 오른쪽으로 돌려서 회전 할 때 -> 현재 두 칸의 오른쪽 칸 모두가 0이여야 회전 가능
         if y1 + 1 < n and y2 + 1 < n:
-            if board[x1][y1 + 1] == 0 and board[x2][y2 + 1] == 0:  # 오른쪽 두 칸 모두 0이여야 회전 가능
-                next_positions.append(((x1, y1), (x1, y1 + 1)))
-                next_positions.append(((x2, y2), (x2, y2 + 1)))
+            if board[x1][y1 + 1] == 0 and board[x2][y2 + 1] == 0:
+                positions.append(((x1, y1), (x1, y1 + 1)))
+                positions.append(((x2, y2), (x2, y2 + 1)))
 
-        # 세로 -> 가로 (왼쪽으로 회전)
+        # 왼쪽으로 돌려서 회전 할 때 -> 현재 두 칸의 왼쪽 칸 모두가 0이여야 회전 가능
         if y1 - 1 >= 0 and y2 - 1 >= 0:
-            if board[x1][y1 - 1] == 0 and board[x2][y2 - 1] == 0:  # 왼쪽 두 칸 모두 0이여야 회전 가능
-                next_positions.append(((x1, y1 - 1), (x1, y1)))
-                next_positions.append(((x2, y2 - 1), (x2, y2)))
+            if board[x1][y1 - 1] == 0 and board[x2][y2 - 1] == 0:
+                positions.append(((x1, y1 - 1), (x1, y1)))
+                positions.append(((x2, y2 - 1), (x2, y2)))
 
-    return next_positions
+    return positions
 
 
-def bfs(board):
-    n = len(board)
+def solution(board):
+    step = 0
+    positions = [((0, 0), (0, 1), step)]
+    q = deque(positions)
     visited = []
-    pos = ((0, 0), (0, 1))
-    cost = 0
-
-    q = deque([(pos, cost)])
-    visited.append(pos)
+    n = len(board)
 
     while q:
-        pos, cost = q.popleft()
+        (x1, y1), (x2, y2), step = q.popleft()
+        if x2 == n - 1 and y2 == n - 1:
+            break
 
-        for next_pos in get_next_positions(board, pos):
-            if next_pos not in visited:
-                visited.append(next_pos)
-                q.append((next_pos, cost + 1))
+        next_positions = get_passible_next_position(board, x1, y1, x2, y2)
+        for np in next_positions:
+            if np in visited:
+                continue
+            q.append((np[0], np[1], step + 1))
+            visited.append(np)
 
-            if next_pos[1][0] == (n - 1) and next_pos[1][1] == (n - 1):
-                return cost + 1
-
-    return 0
+    return step
 
 
-print(solution([[0, 0, 0, 1, 1], [0, 0, 0, 1, 0], [0, 1, 0, 1, 1], [1, 1, 0, 0, 1], [0, 0, 0, 0, 0]]))
+result = solution([[0, 0, 0, 1, 1], [0, 0, 0, 1, 0], [0, 1, 0, 1, 1], [1, 1, 0, 0, 1], [0, 0, 0, 0, 0]])
+print(result)
